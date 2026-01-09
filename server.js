@@ -5,7 +5,7 @@ const https = require('https');
 const zlib = require('zlib');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // Enable CORS for all routes
 app.use(cors());
@@ -14,6 +14,11 @@ app.use(bodyParser.json());
 
 // Serve static files (your HTML page)
 app.use(express.static('.'));
+
+// Root route
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/api-test.html');
+});
 
 // Proxy endpoint
 app.post('/api/proxy', (req, res) => {
@@ -112,6 +117,6 @@ app.post('/api/proxy', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Proxy server running at http://localhost:${PORT}`);
-    console.log(`Open your browser to http://localhost:${PORT}/api-test.html`);
+    console.log(`Proxy server running on port ${PORT}`);
+    console.log(`Open your browser to http://localhost:${PORT}`);
 });
