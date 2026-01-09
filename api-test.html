@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Testing Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 10px auto;
+            padding: 10px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: inline-block;
+            min-width: 100%;
+        }
+        table {
+            margin-bottom: 15px;
+        }
+        td {
+            padding: 6px;
+        }
+        input[type="text"], input[type="password"] {
+            width: 300px;
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        textarea {
+            width: 100%;
+            min-width: 1170px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .response-section, .error-section {
+            margin-top: 15px;
+        }
+        .response-header {
+            background-color: #d4edda;
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            color: #155724;
+            font-size: 14px;
+            min-width: 1170px;
+            box-sizing: border-box;
+        }
+        .error-header {
+            background-color: #f8d7da;
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            color: #721c24;
+            font-size: 14px;
+        }
+        .hidden {
+            display: none;
+        }
+        label {
+            font-weight: bold;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <form id="apiForm">
+            <table>
+                <tr>
+                    <td><label for="apiUrl">API Endpoint:</label></td>
+                    <td><input type="text" id="apiUrl" value="https://t-insightws.mercurygate.net/MercuryGate/common/remoteService.jsp" placeholder="Enter API URL"></td>
+                </tr>
+                <tr>
+                    <td><label for="userid">Username:</label></td>
+                    <td><input type="text" id="userid" value="HemaSourceWS" placeholder="Enter username"></td>
+                </tr>
+                <tr>
+                    <td><label for="password">Password:</label></td>
+                    <td><input type="password" id="password" placeholder="Enter password"></td>
+                </tr>
+            </table>
+
+            <p><label for="request">Request Body (XML):</label></p>
+            <p><textarea id="request" rows="24" placeholder="Enter your XML request here"></textarea></p>
+
+            <p><button type="submit" id="submitButton">Submit</button></p>
+        </form>
+
+        <div id="errorSection" class="error-section hidden">
+            <div class="error-header">
+                <strong>Error</strong>
+            </div>
+            <div id="errorContent" style="padding: 8px; border: 1px solid #f5c6cb; background-color: #f8d7da; border-radius: 4px; font-size: 13px;"></div>
+        </div>
+
+        <div id="responseSection" class="response-section hidden">
+            <div class="response-header">
+                <strong id="responseHead">Response</strong>
+            </div>
+            <textarea id="responseTextArea" rows="25" readonly></textarea>
+        </div>
+    </div>
+
+    <script>
+        let isSubmitting = false;
+
+        // Synchronize textarea widths
+        const requestTextarea = document.getElementById('request');
+        const responseTextarea = document.getElementById('responseTextArea');
+        const responseHeader = document.querySelector('.response-header');
+        
+        function syncTextareaWidths(sourceTextarea, targetTextarea) {
+            const observer = new ResizeObserver(entries => {
+                for (let entry of entries) {
+                    const width = entry.target.offsetWidth;
+                    targetTextarea.style.width = width + 'px';
+                    if (responseHeader) {
+                        responseHeader.style.width = width + 'px';
+                    }
+                }
+            });
+            observer.observe(sourceTextarea);
+        }
+        
+        // Sync both directions
+        syncTextareaWidths(requestTextarea, responseTextarea);
+        syncTextareaWidths(responseTextarea, requestTextarea);
+
+        // Auto-clean pasted content in request textarea
+        document.getElementById('request').addEventListener('paste', function(e) {
+            e.preventDefault();
+            const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+            
+            // Remove "TMS Request XML:" line if it exists at the beginning
+            let cleanedText = pastedText;
+            const firstLine = pastedText.split('\n')[0].trim();
+            if (firstLine.toLowerCase().includes('tms request xml')) {
+                cleanedText = pastedText.split('\n').slice(1).join('\n').trimStart();
+            }
+            
+            // Insert the cleaned text
+            const textarea = e.target;
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            textarea.value = text.substring(0, start) + cleanedText + text.substring(end);
+            
+            // Set cursor position after the inserted text
+            textarea.selectionStart = textarea.selectionEnd = start + cleanedText.length;
+        });
+
+        document.getElementById('apiForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (isSubmitting) return;
+            
+            isSubmitting = true;
+            const submitButton = document.getElementById('submitButton');
+            submitButton.disabled = true;
+            submitButton.textContent = 'Submitting...';
+
+            // Hide previous results
+            document.getElementById('errorSection').classList.add('hidden');
+            document.getElementById('responseSection').classList.add('hidden');
+
+            const apiUrl = document.getElementById('apiUrl').value.trim();
+            const userName = document.getElementById('userid').value;
+            const password = document.getElementById('password').value;
+            const requestXML = document.getElementById('request').value;
+
+            // Validate inputs
+            if (!apiUrl) {
+                showError('Please enter an API endpoint URL');
+                resetSubmitButton();
+                return;
+            }
+
+            const timeStart = Date.now();
+
+            fetch('/api/proxy', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userid: userName,
+                    password: password,
+                    request: requestXML,
+                    targetUrl: apiUrl,
+                    csrfToken: '05074230-992e-4b28-ae7a-aa9bc3620227'
+                })
+            })
+            .then(response => {
+                const timeEnd = Date.now();
+                const totalTime = timeEnd - timeStart;
+
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        throw new Error(text || `HTTP ${response.status}: ${response.statusText}`);
+                    });
+                }
+
+                return response.text().then(text => {
+                    // Check if we got HTML instead of XML
+                    if (text.trim().startsWith('<!') || text.trim().startsWith('<html')) {
+                        showError('Received HTML page instead of API response.\nPlease check your cookies or session may have expired.');
+                        return;
+                    }
+                    
+                    // Try to extract server timing from XML response
+                    let serverTime = null;
+                    try {
+                        const parser = new DOMParser();
+                        const xmlDoc = parser.parseFromString(text, 'text/xml');
+                        const timingNode = xmlDoc.querySelector('timing duration');
+                        if (timingNode) {
+                            serverTime = parseInt(timingNode.textContent);
+                        }
+
+                        // Check if there's Base64 encoded data
+                        const dataNode = xmlDoc.querySelector('data');
+                        if (dataNode && dataNode.textContent) {
+                            try {
+                                const base64Data = dataNode.textContent.trim();
+                                const decodedData = atob(base64Data);
+                                
+                                // Show only the decoded data
+                                document.getElementById('responseTextArea').value = decodedData;
+                                
+                                // Add a note about successful decoding
+                                let headerText = `Response - Total: ${totalTime}ms`;
+                                if (serverTime) {
+                                    headerText += `, Server: ${serverTime}ms, Network: ${totalTime - serverTime}ms`;
+                                }
+                                headerText += ' | ✓ Base64 decoded';
+                                document.getElementById('responseHead').textContent = headerText;
+                                document.getElementById('responseSection').classList.remove('hidden');
+                                return;
+                            } catch (e) {
+                                console.log('Could not decode Base64 data:', e);
+                            }
+                        }
+                        
+                        // If no Base64 data or decoding failed, show original response
+                        document.getElementById('responseTextArea').value = text;
+                    } catch (err) {
+                        // If parsing fails, just show the raw response
+                        document.getElementById('responseTextArea').value = text;
+                    }
+
+                    let headerText = `Response - Total: ${totalTime}ms`;
+                    if (serverTime) {
+                        headerText += `, Server: ${serverTime}ms, Network: ${totalTime - serverTime}ms`;
+                    }
+
+                    document.getElementById('responseHead').textContent = headerText;
+                    document.getElementById('responseSection').classList.remove('hidden');
+                });
+            })
+            .catch(error => {
+                showError(error.message);
+            })
+            .finally(() => {
+                resetSubmitButton();
+            });
+        });
+
+        function showError(message) {
+            document.getElementById('errorContent').textContent = message;
+            document.getElementById('errorSection').classList.remove('hidden');
+        }
+
+        function resetSubmitButton() {
+            isSubmitting = false;
+            const submitButton = document.getElementById('submitButton');
+            submitButton.disabled = false;
+            submitButton.textContent = 'Submit';
+        }
+    </script>
+</body>
+</html>
