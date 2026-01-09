@@ -129,7 +129,33 @@
 
     <script>
         let isSubmitting = false;
+        // Format XML with proper indentation
+        function formatXML(xml) {
+            const PADDING = '    '; // 4 spaces for indentation
+            const reg = /(>)(<)(\/*)/g;
+            let formatted = '';
+            let pad = 0;
 
+            xml = xml.replace(reg, '$1\n$2$3');
+            
+            xml.split('\n').forEach(node => {
+                let indent = 0;
+                if (node.match(/.+<\/\w[^>]*>$/)) {
+                    indent = 0;
+                } else if (node.match(/^<\/\w/) && pad > 0) {
+                    pad -= 1;
+                } else if (node.match(/^<\w[^>]*[^\/]>.*$/)) {
+                    indent = 1;
+                } else {
+                    indent = 0;
+                }
+
+                formatted += PADDING.repeat(pad) + node + '\n';
+                pad += indent;
+            });
+
+            return formatted.trim();
+        }
         // Synchronize textarea widths
         const requestTextarea = document.getElementById('request');
         const responseTextarea = document.getElementById('responseTextArea');
@@ -235,6 +261,7 @@
                     
                     // Try to extract server timing from XML response
                     let serverTime = null;
+                    let formattedText = text;
                     try {
                         const parser = new DOMParser();
                         const xmlDoc = parser.parseFromString(text, 'text/xml');
@@ -250,8 +277,11 @@
                                 const base64Data = dataNode.textContent.trim();
                                 const decodedData = atob(base64Data);
                                 
-                                // Show only the decoded data
-                                document.getElementById('responseTextArea').value = decodedData;
+                                // Format the decoded XML
+                                formattedText = formatXML(decodedData);
+                                
+                                // Show the formatted decoded data
+                                document.getElementById('responseTextArea').value = formattedText;
                                 
                                 // Add a note about successful decoding
                                 let headerText = `Response - Total: ${totalTime}ms`;
