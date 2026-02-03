@@ -54,6 +54,14 @@
         button:hover {
             background-color: #0056b3;
         }
+        button.secondary {
+            background-color: #6c757d;
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+        button.secondary:hover {
+            background-color: #5a6268;
+        }
         button:disabled {
             background-color: #ccc;
             cursor: not-allowed;
@@ -82,6 +90,36 @@
         .hidden {
             display: none;
         }
+        .summary-section {
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+        .summary-table {
+            width: 1170px;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            font-size: 13px;
+        }
+        .summary-table th {
+            background-color: #e9ecef;
+            padding: 10px;
+            text-align: left;
+            border-bottom: 2px solid #dee2e6;
+            font-weight: bold;
+        }
+        .summary-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .summary-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        .summary-table .total-col {
+            text-align: right;
+            font-weight: bold;
+            color: #155724;
+        }
         label {
             font-weight: bold;
             font-size: 14px;
@@ -106,7 +144,10 @@
                 </tr>
             </table>
 
-            <p><label for="request">Request Body (XML):</label></p>
+            <p>
+                <label for="request">Request Body (XML):</label>
+                <button type="button" class="secondary" id="downloadRequest" style="margin-left: 10px;">Download as TXT</button>
+            </p>
             <p><textarea id="request" rows="24" placeholder="Enter your XML request here"></textarea></p>
 
             <p><button type="submit" id="submitButton">Submit</button></p>
@@ -117,6 +158,22 @@
                 <strong>Error</strong>
             </div>
             <div id="errorContent" style="padding: 8px; border: 1px solid #f5c6cb; background-color: #f8d7da; border-radius: 4px; font-size: 13px;"></div>
+        </div>
+
+        <div id="summarySection" class="summary-section hidden">
+            <h3 style="margin-bottom: 10px; color: #155724;">Carrier Rates Summary</h3>
+            <table class="summary-table" id="summaryTable">
+                <thead>
+                    <tr>
+                        <th>Carrier Name</th>
+                        <th>Service</th>
+                        <th>Service Days</th>
+                        <th style="text-align: right;">Total</th>
+                    </tr>
+                </thead>
+                <tbody id="summaryTableBody">
+                </tbody>
+            </table>
         </div>
 
         <div id="responseSection" class="response-section hidden">
@@ -156,6 +213,69 @@
 
             return formatted.trim();
         }
+
+        // Populate carrier summary table
+        function populateCarrierSummary(priceSheets) {
+            const tbody = document.getElementById('summaryTableBody');
+            tbody.innerHTML = '';
+            
+            priceSheets.forEach((sheet, index) => {
+                const carrierNameNode = sheet.querySelector('CarrierName');
+                const totalNode = sheet.querySelector('Total');
+                const serviceNode = sheet.querySelector('Service');
+                const serviceDaysNode = sheet.querySelector('ServiceDays');
+                const isSelected = sheet.getAttribute('isSelected') === 'true';
+                
+                if (carrierNameNode && totalNode) {
+                    let carrierName = carrierNameNode.textContent.trim();
+                    
+                    // Handle CDATA
+                    if (carrierName.includes('CDATA')) {
+                        const cdataMatch = carrierName.match(/<!\[CDATA\[(.*?)\]\]>/);
+                        if (cdataMatch) {
+                            carrierName = cdataMatch[1];
+                        }
+                    }
+                    
+                    const total = parseFloat(totalNode.textContent).toFixed(2);
+                    const service = serviceNode ? serviceNode.textContent : '';
+                    const serviceDays = serviceDaysNode ? parseFloat(serviceDaysNode.textContent).toFixed(1) : '';
+                    
+                    const row = document.createElement('tr');
+                    
+                    row.innerHTML = `
+                        <td>${carrierName}</td>
+                        <td>${service}</td>
+                        <td>${serviceDays}</td>
+                        <td class="total-col">$${total}</td>
+                    `;
+                    
+                    tbody.appendChild(row);
+                }
+            });
+            
+            document.getElementById('summarySection').classList.remove('hidden');
+        }
+
+        // Download request as text file
+        document.getElementById('downloadRequest').addEventListener('click', function() {
+            const requestText = document.getElementById('request').value;
+            if (!requestText.trim()) {
+                alert('Request body is empty. Nothing to download.');
+                return;
+            }
+            
+            const blob = new Blob([requestText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'request_' + new Date().toISOString().slice(0,19).replace(/:/g,'-') + '.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+
         // Synchronize textarea widths
         const requestTextarea = document.getElementById('request');
         const responseTextarea = document.getElementById('responseTextArea');
@@ -213,6 +333,7 @@
 
             // Hide previous results
             document.getElementById('errorSection').classList.add('hidden');
+            document.getElementById('summarySection').classList.add('hidden');
             document.getElementById('responseSection').classList.add('hidden');
 
             const apiUrl = document.getElementById('apiUrl').value.trim();
@@ -262,6 +383,7 @@
                     // Try to extract server timing from XML response
                     let serverTime = null;
                     let formattedText = text;
+                    
                     try {
                         const parser = new DOMParser();
                         const xmlDoc = parser.parseFromString(text, 'text/xml');
@@ -276,6 +398,13 @@
                             try {
                                 const base64Data = dataNode.textContent.trim();
                                 const decodedData = atob(base64Data);
+                                
+                                // Parse decoded data to extract carrier summary
+                                const decodedXmlDoc = parser.parseFromString(decodedData, 'text/xml');
+                                const priceSheets = decodedXmlDoc.querySelectorAll('PriceSheet');
+                                if (priceSheets.length > 0) {
+                                    populateCarrierSummary(priceSheets);
+                                }
                                 
                                 // Format the decoded XML
                                 formattedText = formatXML(decodedData);
@@ -297,10 +426,17 @@
                             }
                         }
                         
-                        // If no Base64 data or decoding failed, show original response
-                        document.getElementById('responseTextArea').value = text;
+                        // Extract carrier summary from PriceSheets (if not Base64)
+                        const priceSheets = xmlDoc.querySelectorAll('PriceSheet');
+                        if (priceSheets.length > 0) {
+                            populateCarrierSummary(priceSheets);
+                        }
+                        
+                        // Format the XML response
+                        formattedText = formatXML(text);
+                        document.getElementById('responseTextArea').value = formattedText;
                     } catch (err) {
-                        // If parsing fails, just show the raw response
+                        // If parsing/formatting fails, just show the raw response
                         document.getElementById('responseTextArea').value = text;
                     }
 
