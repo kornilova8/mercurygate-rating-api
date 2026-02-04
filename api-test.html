@@ -124,25 +124,62 @@
             font-weight: bold;
             font-size: 14px;
         }
+        .endpoint-section {
+            background-color: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            border: 1px solid #dee2e6;
+            width: 1170px;
+            box-sizing: border-box;
+        }
+        .endpoint-section table {
+            margin-bottom: 0;
+        }
+        .endpoint-section td:first-child {
+            width: 120px;
+        }
+        .credentials-section {
+            background-color: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            border: 1px solid #dee2e6;
+            width: 1170px;
+            box-sizing: border-box;
+        }
+        .credentials-section table {
+            margin-bottom: 0;
+        }
+        .credentials-section td:first-child {
+            width: 120px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <form id="apiForm">
+        <div class="endpoint-section">
             <table>
                 <tr>
                     <td><label for="apiUrl">API Endpoint:</label></td>
                     <td><input type="text" id="apiUrl" value="https://t-insightws.mercurygate.net/MercuryGate/common/remoteService.jsp" placeholder="Enter API URL" autocomplete="off"></td>
                 </tr>
-                <tr>
-                    <td><label for="userid">Username:</label></td>
-                    <td><input type="email" id="userid" name="username" placeholder="Enter username" autocomplete="username"></td>
-                </tr>
-                <tr>
-                    <td><label for="password">Password:</label></td>
-                    <td><input type="password" id="password" name="password" placeholder="Enter password" autocomplete="current-password"></td>
-                </tr>
             </table>
+        </div>
+
+        <form id="apiForm">
+            <div class="credentials-section">
+                <table>
+                    <tr>
+                        <td><label for="userid">Username:</label></td>
+                        <td><input type="text" id="userid" name="username" placeholder="Enter username" autocomplete="username"></td>
+                    </tr>
+                    <tr>
+                        <td><label for="password">Password:</label></td>
+                        <td><input type="password" id="password" name="password" placeholder="Enter password" autocomplete="current-password"></td>
+                    </tr>
+                </table>
+            </div>
 
             <p>
                 <label for="request">Request Body (XML):</label>
