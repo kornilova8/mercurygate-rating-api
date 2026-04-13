@@ -1,510 +1,597 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>API Testing Tool</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 1200px;
-            margin: 10px auto;
-            padding: 10px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            display: inline-block;
-            min-width: 100%;
-        }
-        table {
-            margin-bottom: 15px;
-        }
-        td {
-            padding: 6px;
-        }
-        input[type="text"], input[type="password"] {
-            width: 300px;
-            padding: 6px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        textarea {
-            width: 100%;
-            min-width: 1170px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 12px;
-            box-sizing: border-box;
-        }
-        button {
-            background-color: #007bff;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        button.secondary {
-            background-color: #6c757d;
-            padding: 6px 12px;
-            font-size: 13px;
-        }
-        button.secondary:hover {
-            background-color: #5a6268;
-        }
-        button:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
-        .response-section, .error-section {
-            margin-top: 15px;
-        }
-        .response-header {
-            background-color: #d4edda;
-            padding: 8px;
-            border-radius: 4px;
-            margin-bottom: 8px;
-            color: #155724;
-            font-size: 14px;
-            min-width: 1170px;
-            box-sizing: border-box;
-        }
-        .error-header {
-            background-color: #f8d7da;
-            padding: 8px;
-            border-radius: 4px;
-            margin-bottom: 8px;
-            color: #721c24;
-            font-size: 14px;
-        }
-        .hidden {
-            display: none;
-        }
-        .summary-section {
-            margin-top: 15px;
-            margin-bottom: 15px;
-        }
-        .summary-table {
-            width: 1170px;
-            border-collapse: collapse;
-            background: white;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            font-size: 13px;
-        }
-        .summary-table th {
-            background-color: #e9ecef;
-            padding: 10px;
-            text-align: left;
-            border-bottom: 2px solid #dee2e6;
-            font-weight: bold;
-        }
-        .summary-table td {
-            padding: 8px 10px;
-            border-bottom: 1px solid #dee2e6;
-        }
-        .summary-table tr:hover {
-            background-color: #f8f9fa;
-        }
-        .summary-table .total-col {
-            text-align: right;
-            font-weight: bold;
-            color: #155724;
-        }
-        label {
-            font-weight: bold;
-            font-size: 14px;
-        }
-        .endpoint-section {
-            background-color: #f8f9fa;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 12px;
-            border: 1px solid #dee2e6;
-            width: 1170px;
-            box-sizing: border-box;
-        }
-        .endpoint-section table {
-            margin-bottom: 0;
-        }
-        .endpoint-section td:first-child {
-            width: 120px;
-        }
-        .credentials-section {
-            background-color: #f8f9fa;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 12px;
-            border: 1px solid #dee2e6;
-            width: 1170px;
-            box-sizing: border-box;
-        }
-        .credentials-section table {
-            margin-bottom: 0;
-        }
-        .credentials-section td:first-child {
-            width: 120px;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 1200px;
+        margin: 10px auto;
+        padding: 10px;
+        background-color: #f5f5f5;
+      }
+      .container {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        display: inline-block;
+        min-width: 100%;
+      }
+      table {
+        margin-bottom: 15px;
+      }
+      td {
+        padding: 6px;
+      }
+      input[type="text"],
+      input[type="password"] {
+        width: 300px;
+        padding: 6px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      textarea {
+        width: 100%;
+        min-width: 1170px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 12px;
+        box-sizing: border-box;
+      }
+      button {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+      button.secondary {
+        background-color: #6c757d;
+        padding: 6px 12px;
+        font-size: 13px;
+      }
+      button.secondary:hover {
+        background-color: #5a6268;
+      }
+      button:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+      }
+      .response-section,
+      .error-section {
+        margin-top: 15px;
+      }
+      .response-header {
+        background-color: #d4edda;
+        padding: 8px;
+        border-radius: 4px;
+        margin-bottom: 8px;
+        color: #155724;
+        font-size: 14px;
+        min-width: 1170px;
+        box-sizing: border-box;
+      }
+      .error-header {
+        background-color: #f8d7da;
+        padding: 8px;
+        border-radius: 4px;
+        margin-bottom: 8px;
+        color: #721c24;
+        font-size: 14px;
+      }
+      .hidden {
+        display: none;
+      }
+      .summary-section {
+        margin-top: 15px;
+        margin-bottom: 15px;
+      }
+      .summary-table {
+        width: 1170px;
+        border-collapse: collapse;
+        background: white;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        font-size: 13px;
+      }
+      .summary-table th {
+        background-color: #e9ecef;
+        padding: 10px;
+        text-align: left;
+        border-bottom: 2px solid #dee2e6;
+        font-weight: bold;
+      }
+      .summary-table td {
+        padding: 8px 10px;
+        border-bottom: 1px solid #dee2e6;
+      }
+      .summary-table tr:hover {
+        background-color: #f8f9fa;
+      }
+      .summary-table .total-col {
+        text-align: right;
+        font-weight: bold;
+        color: #155724;
+      }
+      label {
+        font-weight: bold;
+        font-size: 14px;
+      }
+      .endpoint-section {
+        background-color: #f8f9fa;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 12px;
+        border: 1px solid #dee2e6;
+        width: 1170px;
+        box-sizing: border-box;
+      }
+      .endpoint-section table {
+        margin-bottom: 0;
+      }
+      .endpoint-section td:first-child {
+        width: 120px;
+      }
+      .credentials-section {
+        background-color: #f8f9fa;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 12px;
+        border: 1px solid #dee2e6;
+        width: 1170px;
+        box-sizing: border-box;
+      }
+      .credentials-section table {
+        margin-bottom: 0;
+      }
+      .credentials-section td:first-child {
+        width: 120px;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <div class="endpoint-section">
-            <table>
-                <tr>
-                    <td><label for="apiUrl">API Endpoint:</label></td>
-                    <td><input type="text" id="apiUrl" value="https://t-insightws.mercurygate.net/MercuryGate/common/remoteService.jsp" placeholder="Enter API URL" autocomplete="off"></td>
-                </tr>
-            </table>
+      <div class="endpoint-section">
+        <table>
+          <tr>
+            <td><label for="apiUrl">API Endpoint:</label></td>
+            <td>
+              <input
+                type="text"
+                id="apiUrl"
+                value="https://t-insightws.mercurygate.net/MercuryGate/common/remoteService.jsp"
+                placeholder="Enter API URL"
+                autocomplete="off"
+              />
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <form id="apiForm" data-form-type="login">
+        <div class="credentials-section">
+          <table>
+            <tr>
+              <td><label for="username">Username:</label></td>
+              <td>
+                <input
+                  type="text"
+                  id="username"
+                  name="username"
+                  placeholder="Enter username"
+                  autocomplete="username"
+                />
+              </td>
+            </tr>
+            <tr>
+              <td><label for="password">Password:</label></td>
+              <td>
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  placeholder="Enter password"
+                  autocomplete="current-password"
+                />
+              </td>
+            </tr>
+          </table>
         </div>
 
-        <form id="apiForm">
-            <div class="credentials-section">
-                <table>
-                    <tr>
-                        <td><label for="userid">Username:</label></td>
-                        <td><input type="text" id="userid" name="username" placeholder="Enter username" autocomplete="username"></td>
-                    </tr>
-                    <tr>
-                        <td><label for="password">Password:</label></td>
-                        <td><input type="password" id="password" name="password" placeholder="Enter password" autocomplete="current-password"></td>
-                    </tr>
-                </table>
-            </div>
+        <p>
+          <label for="request">Request Body (XML):</label>
+          <button
+            type="button"
+            class="secondary"
+            id="downloadRequest"
+            style="margin-left: 10px"
+          >
+            Download as TXT
+          </button>
+        </p>
+        <p>
+          <textarea
+            id="request"
+            rows="24"
+            placeholder="Enter your XML request here"
+          ></textarea>
+        </p>
 
-            <p>
-                <label for="request">Request Body (XML):</label>
-                <button type="button" class="secondary" id="downloadRequest" style="margin-left: 10px;">Download as TXT</button>
-            </p>
-            <p><textarea id="request" rows="24" placeholder="Enter your XML request here"></textarea></p>
+        <p><button type="submit" id="submitButton">Submit</button></p>
+      </form>
 
-            <p><button type="submit" id="submitButton">Submit</button></p>
-        </form>
-
-        <div id="errorSection" class="error-section hidden">
-            <div class="error-header">
-                <strong>Error</strong>
-            </div>
-            <div id="errorContent" style="padding: 8px; border: 1px solid #f5c6cb; background-color: #f8d7da; border-radius: 4px; font-size: 13px;"></div>
+      <div id="errorSection" class="error-section hidden">
+        <div class="error-header">
+          <strong>Error</strong>
         </div>
+        <div
+          id="errorContent"
+          style="
+            padding: 8px;
+            border: 1px solid #f5c6cb;
+            background-color: #f8d7da;
+            border-radius: 4px;
+            font-size: 13px;
+          "
+        ></div>
+      </div>
 
-        <div id="summarySection" class="summary-section hidden">
-            <h3 style="margin-bottom: 10px; color: #155724;">Carrier Rates Summary</h3>
-            <table class="summary-table" id="summaryTable">
-                <thead>
-                    <tr>
-                        <th>Carrier Name</th>
-                        <th>Service</th>
-                        <th>Service Days</th>
-                        <th style="text-align: right;">Total</th>
-                    </tr>
-                </thead>
-                <tbody id="summaryTableBody">
-                </tbody>
-            </table>
-        </div>
+      <div id="summarySection" class="summary-section hidden">
+        <h3 style="margin-bottom: 10px; color: #155724">
+          Carrier Rates Summary
+        </h3>
+        <table class="summary-table" id="summaryTable">
+          <thead>
+            <tr>
+              <th>Carrier Name</th>
+              <th>Service</th>
+              <th>Service Days</th>
+              <th style="text-align: right">Total</th>
+            </tr>
+          </thead>
+          <tbody id="summaryTableBody"></tbody>
+        </table>
+      </div>
 
-        <div id="responseSection" class="response-section hidden">
-            <div class="response-header">
-                <strong id="responseHead">Response</strong>
-            </div>
-            <textarea id="responseTextArea" rows="25" readonly></textarea>
+      <div id="responseSection" class="response-section hidden">
+        <div class="response-header">
+          <strong id="responseHead">Response</strong>
         </div>
+        <textarea id="responseTextArea" rows="25" readonly></textarea>
+      </div>
     </div>
 
     <script>
-        let isSubmitting = false;
-        // Format XML with proper indentation
-        function formatXML(xml) {
-            const PADDING = '    '; // 4 spaces for indentation
-            const reg = /(>)(<)(\/*)/g;
-            let formatted = '';
-            let pad = 0;
+      let isSubmitting = false;
+      // Format XML with proper indentation
+      function formatXML(xml) {
+        const PADDING = "    "; // 4 spaces for indentation
+        const reg = /(>)(<)(\/*)/g;
+        let formatted = "";
+        let pad = 0;
 
-            xml = xml.replace(reg, '$1\n$2$3');
-            
-            xml.split('\n').forEach(node => {
-                let indent = 0;
-                if (node.match(/.+<\/\w[^>]*>$/)) {
-                    indent = 0;
-                } else if (node.match(/^<\/\w/) && pad > 0) {
-                    pad -= 1;
-                } else if (node.match(/^<\w[^>]*[^\/]>.*$/)) {
-                    indent = 1;
-                } else {
-                    indent = 0;
-                }
+        xml = xml.replace(reg, "$1\n$2$3");
 
-                formatted += PADDING.repeat(pad) + node + '\n';
-                pad += indent;
-            });
+        xml.split("\n").forEach((node) => {
+          let indent = 0;
+          if (node.match(/.+<\/\w[^>]*>$/)) {
+            indent = 0;
+          } else if (node.match(/^<\/\w/) && pad > 0) {
+            pad -= 1;
+          } else if (node.match(/^<\w[^>]*[^\/]>.*$/)) {
+            indent = 1;
+          } else {
+            indent = 0;
+          }
 
-            return formatted.trim();
-        }
+          formatted += PADDING.repeat(pad) + node + "\n";
+          pad += indent;
+        });
 
-        // Populate carrier summary table
-        function populateCarrierSummary(priceSheets) {
-            const tbody = document.getElementById('summaryTableBody');
-            tbody.innerHTML = '';
-            
-            priceSheets.forEach((sheet, index) => {
-                const carrierNameNode = sheet.querySelector('CarrierName');
-                const totalNode = sheet.querySelector('Total');
-                const serviceNode = sheet.querySelector('Service');
-                const serviceDaysNode = sheet.querySelector('ServiceDays');
-                const isSelected = sheet.getAttribute('isSelected') === 'true';
-                
-                if (carrierNameNode && totalNode) {
-                    let carrierName = carrierNameNode.textContent.trim();
-                    
-                    // Handle CDATA
-                    if (carrierName.includes('CDATA')) {
-                        const cdataMatch = carrierName.match(/<!\[CDATA\[(.*?)\]\]>/);
-                        if (cdataMatch) {
-                            carrierName = cdataMatch[1];
-                        }
-                    }
-                    
-                    const total = parseFloat(totalNode.textContent).toFixed(2);
-                    const service = serviceNode ? serviceNode.textContent : '';
-                    const serviceDays = serviceDaysNode ? parseFloat(serviceDaysNode.textContent).toFixed(1) : '';
-                    
-                    const row = document.createElement('tr');
-                    
-                    row.innerHTML = `
+        return formatted.trim();
+      }
+
+      // Populate carrier summary table
+      function populateCarrierSummary(priceSheets) {
+        const tbody = document.getElementById("summaryTableBody");
+        tbody.innerHTML = "";
+
+        priceSheets.forEach((sheet, index) => {
+          const carrierNameNode = sheet.querySelector("CarrierName");
+          const totalNode = sheet.querySelector("Total");
+          const serviceNode = sheet.querySelector("Service");
+          const serviceDaysNode = sheet.querySelector("ServiceDays");
+          const isSelected = sheet.getAttribute("isSelected") === "true";
+
+          if (carrierNameNode && totalNode) {
+            let carrierName = carrierNameNode.textContent.trim();
+
+            // Handle CDATA
+            if (carrierName.includes("CDATA")) {
+              const cdataMatch = carrierName.match(/<!\[CDATA\[(.*?)\]\]>/);
+              if (cdataMatch) {
+                carrierName = cdataMatch[1];
+              }
+            }
+
+            const total = parseFloat(totalNode.textContent).toFixed(2);
+            const service = serviceNode ? serviceNode.textContent : "";
+            const serviceDays = serviceDaysNode
+              ? parseFloat(serviceDaysNode.textContent).toFixed(1)
+              : "";
+
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
                         <td>${carrierName}</td>
                         <td>${service}</td>
                         <td>${serviceDays}</td>
                         <td class="total-col">$${total}</td>
                     `;
-                    
-                    tbody.appendChild(row);
-                }
-            });
-            
-            document.getElementById('summarySection').classList.remove('hidden');
-        }
 
-        // Download request as text file
-        document.getElementById('downloadRequest').addEventListener('click', function() {
-            const requestText = document.getElementById('request').value;
-            if (!requestText.trim()) {
-                alert('Request body is empty. Nothing to download.');
-                return;
-            }
-            
-            const blob = new Blob([requestText], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'request_' + new Date().toISOString().slice(0,19).replace(/:/g,'-') + '.txt';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            tbody.appendChild(row);
+          }
         });
 
-        // Synchronize textarea widths
-        const requestTextarea = document.getElementById('request');
-        const responseTextarea = document.getElementById('responseTextArea');
-        const responseHeader = document.querySelector('.response-header');
-        
-        function syncTextareaWidths(sourceTextarea, targetTextarea) {
-            const observer = new ResizeObserver(entries => {
-                for (let entry of entries) {
-                    const width = entry.target.offsetWidth;
-                    targetTextarea.style.width = width + 'px';
-                    if (responseHeader) {
-                        responseHeader.style.width = width + 'px';
-                    }
-                }
-            });
-            observer.observe(sourceTextarea);
-        }
-        
-        // Sync both directions
-        syncTextareaWidths(requestTextarea, responseTextarea);
-        syncTextareaWidths(responseTextarea, requestTextarea);
+        document.getElementById("summarySection").classList.remove("hidden");
+      }
 
-        // Auto-clean pasted content in request textarea
-        document.getElementById('request').addEventListener('paste', function(e) {
-            e.preventDefault();
-            const pastedText = (e.clipboardData || window.clipboardData).getData('text');
-            
-            // Remove "TMS Request XML:" line if it exists at the beginning
-            let cleanedText = pastedText;
-            const firstLine = pastedText.split('\n')[0].trim();
-            if (firstLine.toLowerCase().includes('tms request xml')) {
-                cleanedText = pastedText.split('\n').slice(1).join('\n').trimStart();
-            }
-            
-            // Insert the cleaned text
-            const textarea = e.target;
-            const start = textarea.selectionStart;
-            const end = textarea.selectionEnd;
-            const text = textarea.value;
-            textarea.value = text.substring(0, start) + cleanedText + text.substring(end);
-            
-            // Set cursor position after the inserted text
-            textarea.selectionStart = textarea.selectionEnd = start + cleanedText.length;
+      // Download request as text file
+      document
+        .getElementById("downloadRequest")
+        .addEventListener("click", function () {
+          const requestText = document.getElementById("request").value;
+          if (!requestText.trim()) {
+            alert("Request body is empty. Nothing to download.");
+            return;
+          }
+
+          const blob = new Blob([requestText], { type: "text/plain" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download =
+            "request_" +
+            new Date().toISOString().slice(0, 19).replace(/:/g, "-") +
+            ".txt";
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
         });
 
-        document.getElementById('apiForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            if (isSubmitting) return;
-            
-            isSubmitting = true;
-            const submitButton = document.getElementById('submitButton');
-            submitButton.disabled = true;
-            submitButton.textContent = 'Submitting...';
+      // Synchronize textarea widths
+      const requestTextarea = document.getElementById("request");
+      const responseTextarea = document.getElementById("responseTextArea");
+      const responseHeader = document.querySelector(".response-header");
 
-            // Hide previous results
-            document.getElementById('errorSection').classList.add('hidden');
-            document.getElementById('summarySection').classList.add('hidden');
-            document.getElementById('responseSection').classList.add('hidden');
-
-            const apiUrl = document.getElementById('apiUrl').value.trim();
-            const userName = document.getElementById('userid').value;
-            const password = document.getElementById('password').value;
-            const requestXML = document.getElementById('request').value;
-
-            // Validate inputs
-            if (!apiUrl) {
-                showError('Please enter an API endpoint URL');
-                resetSubmitButton();
-                return;
+      function syncTextareaWidths(sourceTextarea, targetTextarea) {
+        const observer = new ResizeObserver((entries) => {
+          for (let entry of entries) {
+            const width = entry.target.offsetWidth;
+            targetTextarea.style.width = width + "px";
+            if (responseHeader) {
+              responseHeader.style.width = width + "px";
             }
+          }
+        });
+        observer.observe(sourceTextarea);
+      }
 
-            const timeStart = Date.now();
+      // Sync both directions
+      syncTextareaWidths(requestTextarea, responseTextarea);
+      syncTextareaWidths(responseTextarea, requestTextarea);
 
-            fetch('/api/proxy', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    userid: userName,
-                    password: password,
-                    request: requestXML,
-                    targetUrl: apiUrl,
-                    csrfToken: '05074230-992e-4b28-ae7a-aa9bc3620227'
-                })
-            })
-            .then(response => {
-                const timeEnd = Date.now();
-                const totalTime = timeEnd - timeStart;
+      // Auto-clean pasted content in request textarea
+      document
+        .getElementById("request")
+        .addEventListener("paste", function (e) {
+          e.preventDefault();
+          const pastedText = (e.clipboardData || window.clipboardData).getData(
+            "text",
+          );
 
-                if (!response.ok) {
-                    return response.text().then(text => {
-                        throw new Error(text || `HTTP ${response.status}: ${response.statusText}`);
-                    });
-                }
+          // Remove "TMS Request XML:" line if it exists at the beginning
+          let cleanedText = pastedText;
+          const firstLine = pastedText.split("\n")[0].trim();
+          if (firstLine.toLowerCase().includes("tms request xml")) {
+            cleanedText = pastedText
+              .split("\n")
+              .slice(1)
+              .join("\n")
+              .trimStart();
+          }
 
-                return response.text().then(text => {
-                    // Check if we got HTML instead of XML
-                    if (text.trim().startsWith('<!') || text.trim().startsWith('<html')) {
-                        showError('Received HTML page instead of API response.\nPlease check your cookies or session may have expired.');
-                        return;
-                    }
-                    
-                    // Try to extract server timing from XML response
-                    let serverTime = null;
-                    let formattedText = text;
-                    
-                    try {
-                        const parser = new DOMParser();
-                        const xmlDoc = parser.parseFromString(text, 'text/xml');
-                        const timingNode = xmlDoc.querySelector('timing duration');
-                        if (timingNode) {
-                            serverTime = parseInt(timingNode.textContent);
-                        }
+          // Insert the cleaned text
+          const textarea = e.target;
+          const start = textarea.selectionStart;
+          const end = textarea.selectionEnd;
+          const text = textarea.value;
+          textarea.value =
+            text.substring(0, start) + cleanedText + text.substring(end);
 
-                        // Check if there's Base64 encoded data
-                        const dataNode = xmlDoc.querySelector('data');
-                        if (dataNode && dataNode.textContent) {
-                            try {
-                                const base64Data = dataNode.textContent.trim();
-                                const decodedData = atob(base64Data);
-                                
-                                // Parse decoded data to extract carrier summary
-                                const decodedXmlDoc = parser.parseFromString(decodedData, 'text/xml');
-                                const priceSheets = decodedXmlDoc.querySelectorAll('PriceSheet');
-                                if (priceSheets.length > 0) {
-                                    populateCarrierSummary(priceSheets);
-                                }
-                                
-                                // Format the decoded XML
-                                formattedText = formatXML(decodedData);
-                                
-                                // Show the formatted decoded data
-                                document.getElementById('responseTextArea').value = formattedText;
-                                
-                                // Add a note about successful decoding
-                                let headerText = `Response - Total: ${totalTime}ms`;
-                                if (serverTime) {
-                                    headerText += `, Server: ${serverTime}ms, Network: ${totalTime - serverTime}ms`;
-                                }
-                                headerText += ' | ✓ Base64 decoded';
-                                document.getElementById('responseHead').textContent = headerText;
-                                document.getElementById('responseSection').classList.remove('hidden');
-                                return;
-                            } catch (e) {
-                                console.log('Could not decode Base64 data:', e);
-                            }
-                        }
-                        
-                        // Extract carrier summary from PriceSheets (if not Base64)
-                        const priceSheets = xmlDoc.querySelectorAll('PriceSheet');
-                        if (priceSheets.length > 0) {
-                            populateCarrierSummary(priceSheets);
-                        }
-                        
-                        // Format the XML response
-                        formattedText = formatXML(text);
-                        document.getElementById('responseTextArea').value = formattedText;
-                    } catch (err) {
-                        // If parsing/formatting fails, just show the raw response
-                        document.getElementById('responseTextArea').value = text;
-                    }
+          // Set cursor position after the inserted text
+          textarea.selectionStart = textarea.selectionEnd =
+            start + cleanedText.length;
+        });
 
-                    let headerText = `Response - Total: ${totalTime}ms`;
-                    if (serverTime) {
-                        headerText += `, Server: ${serverTime}ms, Network: ${totalTime - serverTime}ms`;
-                    }
+      document
+        .getElementById("apiForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
 
-                    document.getElementById('responseHead').textContent = headerText;
-                    document.getElementById('responseSection').classList.remove('hidden');
+          if (isSubmitting) return;
+
+          isSubmitting = true;
+          const submitButton = document.getElementById("submitButton");
+          submitButton.disabled = true;
+          submitButton.textContent = "Submitting...";
+
+          // Hide previous results
+          document.getElementById("errorSection").classList.add("hidden");
+          document.getElementById("summarySection").classList.add("hidden");
+          document.getElementById("responseSection").classList.add("hidden");
+
+          const apiUrl = document.getElementById("apiUrl").value.trim();
+          const userName = document.getElementById("username").value;
+          const password = document.getElementById("password").value;
+          const requestXML = document.getElementById("request").value;
+
+          // Validate inputs
+          if (!apiUrl) {
+            showError("Please enter an API endpoint URL");
+            resetSubmitButton();
+            return;
+          }
+
+          const timeStart = Date.now();
+
+          fetch("/api/proxy", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userid: userName,
+              password: password,
+              request: requestXML,
+              targetUrl: apiUrl,
+              csrfToken: "05074230-992e-4b28-ae7a-aa9bc3620227",
+            }),
+          })
+            .then((response) => {
+              const timeEnd = Date.now();
+              const totalTime = timeEnd - timeStart;
+
+              if (!response.ok) {
+                return response.text().then((text) => {
+                  throw new Error(
+                    text || `HTTP ${response.status}: ${response.statusText}`,
+                  );
                 });
+              }
+
+              return response.text().then((text) => {
+                // Check if we got HTML instead of XML
+                if (
+                  text.trim().startsWith("<!") ||
+                  text.trim().startsWith("<html")
+                ) {
+                  showError(
+                    "Received HTML page instead of API response.\nPlease check your cookies or session may have expired.",
+                  );
+                  return;
+                }
+
+                // Try to extract server timing from XML response
+                let serverTime = null;
+                let formattedText = text;
+
+                try {
+                  const parser = new DOMParser();
+                  const xmlDoc = parser.parseFromString(text, "text/xml");
+                  const timingNode = xmlDoc.querySelector("timing duration");
+                  if (timingNode) {
+                    serverTime = parseInt(timingNode.textContent);
+                  }
+
+                  // Check if there's Base64 encoded data
+                  const dataNode = xmlDoc.querySelector("data");
+                  if (dataNode && dataNode.textContent) {
+                    try {
+                      const base64Data = dataNode.textContent.trim();
+                      const decodedData = atob(base64Data);
+
+                      // Parse decoded data to extract carrier summary
+                      const decodedXmlDoc = parser.parseFromString(
+                        decodedData,
+                        "text/xml",
+                      );
+                      const priceSheets =
+                        decodedXmlDoc.querySelectorAll("PriceSheet");
+                      if (priceSheets.length > 0) {
+                        populateCarrierSummary(priceSheets);
+                      }
+
+                      // Format the decoded XML
+                      formattedText = formatXML(decodedData);
+
+                      // Show the formatted decoded data
+                      document.getElementById("responseTextArea").value =
+                        formattedText;
+
+                      // Add a note about successful decoding
+                      let headerText = `Response - Total: ${totalTime}ms`;
+                      if (serverTime) {
+                        headerText += `, Server: ${serverTime}ms, Network: ${totalTime - serverTime}ms`;
+                      }
+                      headerText += " | ✓ Base64 decoded";
+                      document.getElementById("responseHead").textContent =
+                        headerText;
+                      document
+                        .getElementById("responseSection")
+                        .classList.remove("hidden");
+                      return;
+                    } catch (e) {
+                      console.log("Could not decode Base64 data:", e);
+                    }
+                  }
+
+                  // Extract carrier summary from PriceSheets (if not Base64)
+                  const priceSheets = xmlDoc.querySelectorAll("PriceSheet");
+                  if (priceSheets.length > 0) {
+                    populateCarrierSummary(priceSheets);
+                  }
+
+                  // Format the XML response
+                  formattedText = formatXML(text);
+                  document.getElementById("responseTextArea").value =
+                    formattedText;
+                } catch (err) {
+                  // If parsing/formatting fails, just show the raw response
+                  document.getElementById("responseTextArea").value = text;
+                }
+
+                let headerText = `Response - Total: ${totalTime}ms`;
+                if (serverTime) {
+                  headerText += `, Server: ${serverTime}ms, Network: ${totalTime - serverTime}ms`;
+                }
+
+                document.getElementById("responseHead").textContent =
+                  headerText;
+                document
+                  .getElementById("responseSection")
+                  .classList.remove("hidden");
+              });
             })
-            .catch(error => {
-                showError(error.message);
+            .catch((error) => {
+              showError(error.message);
             })
             .finally(() => {
-                resetSubmitButton();
+              resetSubmitButton();
             });
         });
 
-        function showError(message) {
-            document.getElementById('errorContent').textContent = message;
-            document.getElementById('errorSection').classList.remove('hidden');
-        }
+      function showError(message) {
+        document.getElementById("errorContent").textContent = message;
+        document.getElementById("errorSection").classList.remove("hidden");
+      }
 
-        function resetSubmitButton() {
-            isSubmitting = false;
-            const submitButton = document.getElementById('submitButton');
-            submitButton.disabled = false;
-            submitButton.textContent = 'Submit';
-        }
+      function resetSubmitButton() {
+        isSubmitting = false;
+        const submitButton = document.getElementById("submitButton");
+        submitButton.disabled = false;
+        submitButton.textContent = "Submit";
+      }
     </script>
-</body>
+  </body>
 </html>
